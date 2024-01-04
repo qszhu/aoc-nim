@@ -7,8 +7,6 @@ import std/[
   strutils,
 ]
 
-import ../utils
-
 
 
 type Op = enum
