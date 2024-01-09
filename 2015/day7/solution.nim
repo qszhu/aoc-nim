@@ -90,25 +90,26 @@ proc parse(input: string): Circuit =
   for line in input.split("\n"):
     result.addGate(line.parseLine)
 
-const test = """
-123 -> x
-456 -> y
-x AND y -> d
-x OR y -> e
-x LSHIFT 2 -> f
-y RSHIFT 2 -> g
-NOT x -> h
-NOT y -> i
-""".strip
+when defined(test):
+  const test = """
+  123 -> x
+  456 -> y
+  x AND y -> d
+  x OR y -> e
+  x LSHIFT 2 -> f
+  y RSHIFT 2 -> g
+  NOT x -> h
+  NOT y -> i
+  """.strip
 
-doAssert test.parse.eval("d") == 72
-doAssert test.parse.eval("e") == 507
-doAssert test.parse.eval("f") == 492
-doAssert test.parse.eval("g") == 114
-doAssert test.parse.eval("h") == 65412
-doAssert test.parse.eval("i") == 65079
-doAssert test.parse.eval("x") == 123
-doAssert test.parse.eval("y") == 456
+  doAssert test.parse.eval("d") == 72
+  doAssert test.parse.eval("e") == 507
+  doAssert test.parse.eval("f") == 492
+  doAssert test.parse.eval("g") == 114
+  doAssert test.parse.eval("h") == 65412
+  doAssert test.parse.eval("i") == 65079
+  doAssert test.parse.eval("x") == 123
+  doAssert test.parse.eval("y") == 456
 
 proc part1(input: string): int =
   input.parse.eval("a").int
@@ -118,7 +119,7 @@ proc part2(input: string): int =
   circuit.cache["b"] = Wire(a: $part1(input), output: "b")
   circuit.eval("a").int
 
-when isMainModule:
+when isMainModule and not defined(test):
   let input = readAll(stdin).strip
   echo part1(input)
   echo part2(input)

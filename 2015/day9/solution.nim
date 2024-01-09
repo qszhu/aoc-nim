@@ -17,7 +17,8 @@ proc parseLine(line: string): (string, string, int) =
   else:
     raise newException(ValueError, "parse error: " & line)
 
-doAssert parseLine("London to Dublin = 464") == ("London", "Dublin", 464)
+when defined(test):
+  doAssert parseLine("London to Dublin = 464") == ("London", "Dublin", 464)
 
 proc parse(input: string): seq[seq[int]] =
   var mapping = initTable[string, int]()
@@ -70,7 +71,7 @@ proc part2(input: string): int =
   var adj = input.parse
   maxDist(adj)
 
-when isMainModule:
+when isMainModule and not defined(test):
   let input = readAll(stdin).strip
   echo part1(input)
   echo part2(input)
