@@ -68,7 +68,7 @@ when defined(test):
   block:
     doAssert getLens("1,2,3") == @[49, 44, 50, 44, 51, 17, 31, 73, 47, 23]
 
-proc hash(input: string): string =
+proc hash*(input: string): string =
   let lens = getLens(input)
   var a = (0 ..< 256).toSeq
   var cur, skip = 0
