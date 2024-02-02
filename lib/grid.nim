@@ -1,3 +1,7 @@
+import std/[sequtils]
+
+
+
 const dPos4 = [(-1, 0), (0, 1), (1, 0), (0, -1)]
 
 iterator neighbors4*(p, dim: (int, int)): (int, int) =
@@ -21,3 +25,15 @@ proc floodfill*[T](grid: var seq[seq[T]], r, c: int, src, dst: T): int {.discard
       result += fill(grid, nr, nc)
 
   fill(grid, r, c)
+
+type PrefixSum2D[T] = seq[seq[T]]
+
+proc prefixSum*[T](grid: var seq[seq[T]]): PrefixSum2D[T] =
+  let (rows, cols) = (grid.len, grid[0].len)
+  result = newSeqWith(rows + 1, newSeq[T](cols + 1))
+  for r in 1 .. rows:
+    for c in 1 .. cols:
+      result[r][c] = result[r - 1][c] + result[r][c - 1] - result[r - 1][c - 1] + grid[r - 1][c - 1]
+
+proc blockSum*[T](p: var PrefixSum2D[T], r1, c1, r2, c2: int): T =
+  p[r2 + 1][c2 + 1] - p[r2 + 1][c1] - p[r1][c2 + 1] + p[r1][c1]
