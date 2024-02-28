@@ -25,16 +25,16 @@ type
 
   Registers = array[6, int]
 
-  Computer = ref object
-    regs: Registers
+  Computer* = ref object
+    regs*: Registers
     insts: seq[Inst]
-    ip, ipReg: int
+    ip*, ipReg: int
 
 proc parseInst(line: string): Inst =
   let p = line.split(" ")
   (p[0], p[1].parseInt, p[2].parseInt, p[3].parseInt)
 
-proc parse(input: string): Computer =
+proc parse*(input: string): Computer =
   result.new
   let lines = input.split("\n")
   result.ipReg = lines[0].split(" ")[1].parseInt
@@ -94,7 +94,7 @@ proc exec(regs: Registers, inst: string, a, b, c: int): Registers =
   else:
     raise newException(ValueError, "unknown instruction " & inst)
 
-proc step(self: Computer): bool =
+proc step*(self: Computer): bool =
   let (inst, a, b, c) = self.insts[self.ip]
   self.regs[self.ipReg] = self.ip
   self.regs = self.regs.exec(inst, a, b, c)
