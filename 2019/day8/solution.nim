@@ -98,5 +98,5 @@ proc part2(input: string): string =
 
 when isMainModule and not defined(test):
   let input = readFile("input").strip
-  # echo part1(input)
+  echo part1(input)
   echo part2(input)
