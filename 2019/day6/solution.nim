@@ -1,22 +1,4 @@
-import std/[
-  algorithm,
-  bitops,
-  deques,
-  heapqueue,
-  intsets,
-  json,
-  lists,
-  math,
-  options,
-  rdstdin,
-  re,
-  sequtils,
-  sets,
-  strformat,
-  strutils,
-  tables,
-  sugar,
-]
+import ../../lib/imports
 
 
 
@@ -58,8 +40,7 @@ J)K
 K)L
 """.strip
   block:
-    let t = input.parse
-    doAssert t.depthSum == 42
+    doAssert input.parse.depthSum == 42
 
 proc part1(input: string): int =
   input.parse.depthSum
@@ -95,8 +76,7 @@ K)YOU
 I)SAN
 """.strip
   block:
-    let t = input1.parse
-    doAssert t.dist("YOU", "SAN") == 4
+    doAssert input1.parse.dist("YOU", "SAN") == 4
 
 proc part2(input: string): int =
   input.parse.dist("YOU", "SAN")

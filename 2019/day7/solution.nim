@@ -1,134 +1,131 @@
-import std/[
-  algorithm,
-  bitops,
-  deques,
-  heapqueue,
-  intsets,
-  json,
-  lists,
-  math,
-  options,
-  os,
-  rdstdin,
-  re,
-  sequtils,
-  sets,
-  streams,
-  strformat,
-  strutils,
-  tables,
-  threadpool,
-  sugar,
-]
+import ../../lib/imports
 
 
+
+var queues: seq[Deque[int]]
 
 type
-  Inst = tuple[op: int, modes: seq[int]]
+  InstMode = enum
+    ModePosition
+    ModeImmediate
+
+  RunStatus = enum
+    StatusRunning
+    StatusWaiting
+    StatusFinished
+
+  Inst = tuple[op: int, modes: array[3, InstMode]]
 
 proc parseInst(n: int): Inst =
   (
     op: n mod 100,
-    modes: @[
-      n mod 1_000 div 100,
-      n mod 10_000 div 1_000,
-      n mod 100_000 div 10_000,
-    ],
+    modes: [
+      (n mod 1000 div 100).InstMode,
+      (n mod 10000 div 1000).InstMode,
+      (n mod 100000 div 10000).InstMode,
+    ]
   )
-
-var channels: array[6, Channel[int]]
-for i in 0 ..< channels.len: channels[i].open
 
 type
   Program = ref object
-    data: seq[int]
+    mem: seq[int]
     ip: int
     ic, oc: int
 
-const MODE_POS = 0
-const MODE_IMD = 1
-
-proc getRaw(self: Program, i = 0): int =
-  self.data[self.ip + i]
-
-proc getValue(self: Program, i: int): int =
-  let (_, modes) = self.getRaw.parseInst
-  let v = self.getRaw(i)
-  if modes[i - 1] == MODE_IMD: v
-  else: self.data[v]
-
-proc hasEnded(self: Program): bool =
-  self.getRaw == 99
-
-proc run(self: Program) =
-  while true:
-    if self.getRaw == 99: return
-    let (op, _) = self.getRaw.parseInst
-    case op:
-    of 1:
-      let a = self.getValue(1)
-      let b = self.getValue(2)
-      let c = self.getRaw(3)
-      self.data[c] = a + b
-      self.ip += 4
-    of 2:
-      let a = self.getValue(1)
-      let b = self.getValue(2)
-      let c = self.getRaw(3)
-      self.data[c] = a * b
-      self.ip += 4
-    of 3:
-      let a = self.getRaw(1)
-      let v = channels[self.ic].recv()
-      self.data[a] = v
-      self.ip += 2
-    of 4:
-      let a = self.getValue(1)
-      channels[self.oc].send(a)
-      self.ip += 2
-    of 5:
-      let a = self.getValue(1)
-      let b = self.getValue(2)
-      if a != 0:
-        self.ip = b
-      else:
-        self.ip += 3
-    of 6:
-      let a = self.getValue(1)
-      let b = self.getValue(2)
-      if a == 0:
-        self.ip = b
-      else:
-        self.ip += 3
-    of 7:
-      let a = self.getValue(1)
-      let b = self.getValue(2)
-      let c = self.getRaw(3)
-      self.data[c] = if a < b: 1 else: 0
-      self.ip += 4
-    of 8:
-      let a = self.getValue(1)
-      let b = self.getValue(2)
-      let c = self.getRaw(3)
-      self.data[c] = if a == b: 1 else: 0
-      self.ip += 4
-    else:
-      raise newException(ValueError, &"unknown op: {op}")
-
-proc parse(input: string, ic, oc: int): Program =
+proc newProgram(mem: seq[int], ic, oc: int): Program =
   result.new
-  result.data = input.split(",").mapIt(it.parseInt)
+  result.mem = mem
   result.ic = ic
   result.oc = oc
 
+proc getRaw(self: Program, i = 0): int =
+  self.mem[self.ip + i]
+
+template getParam(i: int, write = false): int =
+  let v = self.getRaw(i)
+  case inst.modes[i - 1]
+  of ModeImmediate:
+    v
+  of ModePosition:
+    if write: v else: self.mem[v]
+
+proc step(self: Program): RunStatus =
+  if self.getRaw == 99: return StatusFinished
+
+  let inst = self.getRaw.parseInst
+  case inst.op:
+  of 1:
+    let a = getParam(1)
+    let b = getParam(2)
+    let c = getParam(3, write = true)
+    self.mem[c] = a + b
+    self.ip += 4
+  of 2:
+    let a = getParam(1)
+    let b = getParam(2)
+    let c = getParam(3, write = true)
+    self.mem[c] = a * b
+    self.ip += 4
+  of 3:
+    let a = getParam(1, write = true)
+    if queues[self.ic].len == 0: return StatusWaiting
+    self.mem[a] = queues[self.ic].popFirst
+    self.ip += 2
+  of 4:
+    let a = getParam(1)
+    queues[self.oc].addLast a
+    self.ip += 2
+  of 5:
+    let a = getParam(1)
+    let b = getParam(2)
+    if a != 0:
+      self.ip = b
+    else:
+      self.ip += 3
+  of 6:
+    let a = getParam(1)
+    let b = getParam(2)
+    if a == 0:
+      self.ip = b
+    else:
+      self.ip += 3
+  of 7:
+    let a = getParam(1)
+    let b = getParam(2)
+    let c = getParam(3, write = true)
+    self.mem[c] = if a < b: 1 else: 0
+    self.ip += 4
+  of 8:
+    let a = getParam(1)
+    let b = getParam(2)
+    let c = getParam(3, write = true)
+    self.mem[c] = if a == b: 1 else: 0
+    self.ip += 4
+  else:
+    raise newException(ValueError, &"unknown op: {inst.op}")
+
+proc newProgram(input: string, ic, oc: int): Program {.inline.} =
+  newProgram(input.split(",").mapIt(it.parseInt), ic, oc)
+
 proc signal(input: string, conf: seq[int]): int =
+  let N = conf.len
+
+  queues = newSeq[Deque[int]]()
+  for i in 0 .. N: queues.add initDeque[int]()
+
+  var programs = newSeq[Program]()
   for i, c in conf:
-    channels[i].send(c)
-    var p = input.parse(i, i + 1)
-    spawn p.run()
-  channels[0].send(0)
-  sync()
-  result = channels[^1].recv
+    queues[i].addLast c
+    programs.add newProgram(input, i, i + 1)
+
+  queues[0].addLast 0
+  while true:
+    var hasRunning = false
+    for p in programs:
+      if p.step == StatusRunning: hasRunning = true
+    if not hasRunning: break
+
+  queues[^1].popFirst
 
 when defined(test):
   block:
@@ -156,13 +153,24 @@ proc part1(input: string): int =
 
 
 proc signal2(input: string, conf: seq[int]): int =
+  let N = conf.len
+
+  queues = newSeq[Deque[int]]()
+  for i in 0 ..< N: queues.add initDeque[int]()
+
+  var programs = newSeq[Program]()
   for i, c in conf:
-    channels[i].send(c)
-    var p = input.parse(i, (i + 1) mod 5)
-    spawn p.run()
-  channels[0].send(0)
-  sync()
-  result = channels[0].recv
+    queues[i].addLast c
+    programs.add newProgram(input, i, (i + 1) mod N)
+
+  queues[0].addLast 0
+  while true:
+    var hasRunning = false
+    for p in programs:
+      if p.step == StatusRunning: hasRunning = true
+    if not hasRunning: break
+
+  queues[0].popFirst
 
 when defined(test):
   block:

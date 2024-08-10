@@ -5,7 +5,7 @@ import std/[
 
 
 type SquareMatrix*[T] = ref object
-  a*: seq[seq[T]]
+  a: seq[seq[T]]
 
 proc newSquareMatrix*[T](dim: int): SquareMatrix[T] =
   result.new
@@ -20,6 +20,9 @@ proc identity*[T](dim: int, one: T): SquareMatrix[T] =
   for i in 0 ..< dim:
     result.a[i][i] = one
 
+template `[]`*[T](self: SquareMatrix[T], r: int): untyped =
+  self.a[r]
+
 proc `*`*[T](a, b: SquareMatrix[T]): SquareMatrix[T] =
   let d = a.a.len
   result = newSquareMatrix[T](d)
@@ -29,7 +32,7 @@ proc `*`*[T](a, b: SquareMatrix[T]): SquareMatrix[T] =
         result.a[i][j] = result.a[i][j] + a.a[i][k] * b.a[k][j]
 template `*=`*[T](x, y: SquareMatrix[T]): void = x = x * y
 
-proc `^`*[T](x: SquareMatrix[T], p: int64, one: T): SquareMatrix[T] =
+proc `**`*[T](x: SquareMatrix[T], p: int64, one: T): SquareMatrix[T] =
   result = identity[T](x.a.len, one)
   var x = x
   var p = p
@@ -37,4 +40,4 @@ proc `^`*[T](x: SquareMatrix[T], p: int64, one: T): SquareMatrix[T] =
     if (p and 1) != 0: result *= x
     x *= x
     p = p shr 1
-template `^=`*[T](x: SquareMatrix[T], p: int64): void = x = x ^ y
+template `**=`*[T](x: SquareMatrix[T], p: int64): void = x = x ^ y

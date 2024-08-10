@@ -1,25 +1,4 @@
-import std/[
-  algorithm,
-  bitops,
-  deques,
-  heapqueue,
-  intsets,
-  json,
-  lists,
-  math,
-  options,
-  os,
-  rdstdin,
-  re,
-  sequtils,
-  sets,
-  streams,
-  strformat,
-  strutils,
-  tables,
-  threadpool,
-  sugar,
-]
+import ../../lib/imports
 
 
 
@@ -43,9 +22,9 @@ proc scan(g: Grid, r0, c0: int): Table[float, seq[(int, int)]] =
       if (r, c) == (r0, c0): continue
       if g[r][c] == EMPTY: continue
       let angle = getAngle(r - r0, c - c0)
-      var arr = result.getOrDefault(angle, newSeq[(int, int)]())
-      arr.add (r, c)
-      result[angle] = arr
+      if angle notin result:
+        result[angle] = newSeq[(int, int)]()
+      result[angle].add (r, c)
 
 proc countLines(g: Grid, r, c: int): int =
   g.scan(r, c).len
@@ -176,13 +155,13 @@ proc vaporList(g: Grid): seq[(int, int)] =
   for a in angles:
     sortedScans[a] = scans[a].sortedByIt(-dist(tr, tc, it[0], it[1]))
 
-  var hasMore = true
-  while hasMore:
-    hasMore = false
+  while true:
+    var hasMore = false
     for a in angles:
       if sortedScans[a].len == 0: continue
       hasMore = true
       result.add sortedScans[a].pop
+    if not hasMore: break
 
 
 

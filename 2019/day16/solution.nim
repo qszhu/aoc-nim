@@ -1,25 +1,4 @@
-import std/[
-  algorithm,
-  bitops,
-  deques,
-  heapqueue,
-  intsets,
-  json,
-  lists,
-  math,
-  options,
-  os,
-  rdstdin,
-  re,
-  sequtils,
-  sets,
-  streams,
-  strformat,
-  strutils,
-  tables,
-  threadpool,
-  sugar,
-]
+import ../../lib/imports
 
 
 
@@ -67,6 +46,8 @@ when defined(test):
     doAssert part1("80871224585914546619083218645595") == "24176176"
     doAssert part1("19617804207202209144916044189917") == "73745418"
     doAssert part1("69317163492948606335995924319873") == "52432133"
+
+
 
 proc part2(input: string): string =
   let offset = input[0 ..< 7].parseInt

@@ -1,25 +1,4 @@
-import std/[
-  algorithm,
-  bitops,
-  deques,
-  heapqueue,
-  intsets,
-  json,
-  lists,
-  math,
-  options,
-  os,
-  rdstdin,
-  re,
-  sequtils,
-  sets,
-  streams,
-  strformat,
-  strutils,
-  tables,
-  threadpool,
-  sugar,
-]
+import ../../lib/imports
 
 
 
@@ -38,6 +17,8 @@ when defined(test):
     deck.dealNew
     doAssert deck == @[9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
 
+
+
 proc cut(self: var Deck, n: int) =
   let M = self.len
   let i = (n + M) mod M
@@ -48,10 +29,13 @@ when defined(test):
     var deck = initDeck(10)
     deck.cut(3)
     doAssert deck == @[3, 4, 5, 6, 7, 8, 9, 0, 1, 2]
+
   block:
     var deck = initDeck(10)
     deck.cut(-4)
     doAssert deck == @[6, 7, 8, 9, 0, 1, 2, 3, 4, 5]
+
+
 
 proc dealInc(self: var Deck, n: int) =
   let M = self.len
@@ -66,6 +50,8 @@ when defined(test):
     deck.dealInc(3)
     doAssert deck == @[0, 7, 4, 1, 8, 5, 2, 9, 6, 3]
 
+
+
 type
   DealType {.pure.} = enum
     DEAL_NEW
@@ -74,12 +60,13 @@ type
 
 proc parseLine(line: string): (DealType, int) =
   if line =~ re"cut (-?\d+)":
-    return (CUT, matches[0].parseInt)
-  if line =~ re"deal with increment (\d+)":
-    return (DEAL_INC, matches[0].parseInt)
-  if line == "deal into new stack":
-    return (DEAL_NEW, 0)
-  raise newException(ValueError, "parse error: " & line)
+    (CUT, matches[0].parseInt)
+  elif line =~ re"deal with increment (\d+)":
+    (DEAL_INC, matches[0].parseInt)
+  elif line == "deal into new stack":
+    (DEAL_NEW, 0)
+  else:
+    raise newException(ValueError, "parse error: " & line)
 
 when defined(test):
   block:
@@ -87,6 +74,8 @@ when defined(test):
     doAssert "cut -456".parseLine == (CUT, -456)
     doAssert "deal with increment 789".parseLine == (DEAL_INC, 789)
     doAssert "deal into new stack".parseLine == (DEAL_NEW, 0)
+
+
 
 proc parse(input: string): seq[(DealType, int)] {.inline.} =
   input.split("\n").mapIt(it.parseLine)
@@ -108,6 +97,7 @@ deal into new stack
     var deck = initDeck(10)
     deck.deal(input.parse)
     doAssert deck == @[0, 3, 6, 9, 2, 5, 8, 1, 4, 7]
+
   let input1 = """
 cut 6
 deal with increment 7
@@ -117,6 +107,7 @@ deal into new stack
     var deck = initDeck(10)
     deck.deal(input1.parse)
     doAssert deck == @[3, 0, 7, 4, 1, 8, 5, 2, 9, 6]
+
   let input2 = """
 deal with increment 7
 deal with increment 9
@@ -126,6 +117,7 @@ cut -2
     var deck = initDeck(10)
     deck.deal(input2.parse)
     doAssert deck == @[6, 3, 0, 7, 4, 1, 8, 5, 2, 9]
+
   let input3 = """
 deal into new stack
 cut -2
@@ -150,39 +142,18 @@ proc part1(input: string): int =
 
 
 
-import ../../lib/matrix
-import bigints
-
-# const MOD = initBigInt(10)
-# const MOD = initBigInt(10007)
-const MOD = initBigInt(119315717514047)
-
-type
-  mint* = distinct BigInt
-
-proc `+`*(x, y: mint): mint {.inline.} = (((x.BigInt mod MOD) + (y.BigInt mod MOD) + MOD) mod MOD).mint
-proc `-`*(x, y: mint): mint {.inline.} = (((x.BigInt mod MOD) - (y.BigInt mod MOD) + MOD) mod MOD).mint
-proc `*`*(x, y: mint): mint {.inline.} = ((x.BigInt mod MOD) * (y.BigInt mod MOD) mod MOD).mint
-proc `^`*(x, y: mint): mint =
-  let zero = 0.initBigInt
-  let one = 1.initBigInt
-  result = one.mint
-  var
-    x = x
-    y = y.BigInt
-  while y > zero:
-    if (y and one) != zero: result = result * x
-    x = x * x
-    y = y shr 1
-proc `/`*(x, y: mint): mint =
-  x * (y ^ (MOD - 2.initBigInt).mint)
-
-proc initMint(n: int): mint {.inline.} =
-  initBigInt(n).mint
+when defined(test):
+  modBigint(10)
+else:
+  modBigInt(119315717514047)
 
 type
   DeckPos = SquareMatrix[mint]
 
+#[
+[p, 0]
+[0, 1]
+]#
 proc newDeckPos(p: int): DeckPos {.inline.} =
   newSquareMatrix(@[
     @[initMint(p), initMint(0)],
@@ -190,10 +161,16 @@ proc newDeckPos(p: int): DeckPos {.inline.} =
   ])
 
 proc pos(self: DeckPos): int {.inline.} =
-  ($(self.a[0][0] + self.a[0][1]).BigInt).parseInt
+  ($(self[0][0] + self[0][1]).BigInt).parseInt
 
+
+
+#[
+[-1, N - 1]
+[0, 1]
+]#
 let DEAL_NEW = newSquareMatrix(@[
-  @[initMint(-1), (MOD - initBigInt(1)).mint],
+  @[initMint(-1), (MOD - One).mint],
   @[initMint(0), initMint(1)]
 ])
 
@@ -204,6 +181,12 @@ when defined(test):
       let dp = DEAL_NEW * newDeckPos(i)
       doAssert a[dp.pos] == i
 
+
+
+#[
+[1, -o]
+[0, 1]
+]#
 proc CUT(o: int): SquareMatrix[mint] {.inline.} =
   newSquareMatrix(@[
     @[initMint(1), initMint(-o)],
@@ -217,6 +200,7 @@ when defined(test):
     for i in 0 ..< 10:
       let dp = t * newDeckPos(i)
       doAssert a[dp.pos] == i
+
   block:
     let t = CUT(-4)
     let a = @[6, 7, 8, 9, 0, 1, 2, 3, 4, 5]
@@ -224,6 +208,12 @@ when defined(test):
       let dp = t * newDeckPos(i)
       doAssert a[dp.pos] == i
 
+
+
+#[
+[o, 0]
+[0, 1]
+]#
 proc DEAL_INC(o: int): SquareMatrix[mint] {.inline.} =
   newSquareMatrix(@[
     @[initMint(o), initMint(0)],
@@ -237,6 +227,8 @@ when defined(test):
     for i in 0 ..< 10:
       let dp = t * newDeckPos(i)
       doAssert a[dp.pos] == i
+
+
 
 proc deal(deals: seq[(DealType, int)]): SquareMatrix[mint] =
   result = identity(2, initMint(1))
@@ -253,18 +245,21 @@ when defined(test):
     for i in 0 ..< 10:
       let dp = t * newDeckPos(i)
       doAssert a[dp.pos] == i
+
   block:
     let t = input1.parse.deal
     let a = @[3, 0, 7, 4, 1, 8, 5, 2, 9, 6]
     for i in 0 ..< 10:
       let dp = t * newDeckPos(i)
       doAssert a[dp.pos] == i
+
   block:
     let t = input2.parse.deal
     let a = @[6, 3, 0, 7, 4, 1, 8, 5, 2, 9]
     for i in 0 ..< 10:
       let dp = t * newDeckPos(i)
       doAssert a[dp.pos] == i
+
   block:
     let t = input3.parse.deal
     let a = @[9, 2, 5, 8, 1, 4, 7, 0, 3, 6]
@@ -272,27 +267,25 @@ when defined(test):
       let dp = t * newDeckPos(i)
       doAssert a[dp.pos] == i
 
+
+
 proc inv(t: SquareMatrix[mint]): SquareMatrix[mint] =
-  let (a, b) = (t.a[0][0], t.a[0][1])
-  let (c, d) = (t.a[1][0], t.a[1][1])
-  let p = 1.initBigInt.mint / (a * d - b * c)
+  let (a, b) = (t[0][0], t[0][1])
+  let (c, d) = (t[1][0], t[1][1])
+  let p = One.mint / (a * d - b * c)
   newSquareMatrix(@[
-    @[p * d, 0.initBigInt.mint - p * b],
-    @[0.initBigInt.mint - p * c, p * a]
+    @[p * d, initMint(0) - p * b],
+    @[initMint(0) - p * c, p * a]
   ])
 
 proc part2(input: string): int =
-  let repeats = 101741582076661
+  const repeats = 101741582076661
   var t = input.parse.deal
-  t = `^`(t, repeats, initMint(1))
+  t = t.`**`(repeats, initMint(1))
   t = t.inv
-  let dp = t * newDeckPos(2020)
-  dp.pos
+  (t * newDeckPos(2020)).pos
 
-# proc part1(input: string): int =
-#   var t = input.parse.deal
-#   let dp = t * newDeckPos(2019)
-#   dp.pos
+
 
 when isMainModule and not defined(test):
   let input = readFile("input").strip

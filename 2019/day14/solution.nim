@@ -1,27 +1,4 @@
-import std/[
-  algorithm,
-  bitops,
-  deques,
-  heapqueue,
-  intsets,
-  json,
-  lists,
-  math,
-  options,
-  os,
-  rdstdin,
-  re,
-  sequtils,
-  sets,
-  streams,
-  strformat,
-  strutils,
-  tables,
-  threadpool,
-  sugar,
-]
-
-import ../../lib/[bisect, graph]
+import ../../lib/imports
 
 
 

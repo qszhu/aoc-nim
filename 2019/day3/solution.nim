@@ -1,22 +1,4 @@
-import std/[
-  algorithm,
-  bitops,
-  deques,
-  heapqueue,
-  intsets,
-  json,
-  lists,
-  math,
-  options,
-  rdstdin,
-  re,
-  sequtils,
-  sets,
-  strformat,
-  strutils,
-  tables,
-  sugar,
-]
+import ../../lib/imports
 
 
 

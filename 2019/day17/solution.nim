@@ -1,177 +1,27 @@
-import std/[
-  algorithm,
-  bitops,
-  deques,
-  heapqueue,
-  intsets,
-  json,
-  lists,
-  math,
-  options,
-  os,
-  rdstdin,
-  re,
-  sequtils,
-  sets,
-  streams,
-  strformat,
-  strutils,
-  tables,
-  threadpool,
-  sugar,
-]
+import ../../lib/imports
+import ../day9/programs
 
 
 
 type
-  Value = int64
+  Grid = seq[string]
 
-var channels: array[2, Channel[Value]]
-for i in 0 ..< channels.len: channels[i].open
+proc getOutput(): string =
+  while queues[1].len > 0:
+    result &= queues[1].popFirst.char
 
-type
-  Inst = tuple[op: int, modes: seq[int]]
-
-proc parseInst(n: Value): Inst =
-  (
-    op: (n mod 100).int,
-    modes: @[
-      n mod 1_000 div 100,
-      n mod 10_000 div 1_000,
-      n mod 100_000 div 10_000,
-    ].mapIt(it.int),
-  )
-
-type
-  Program = ref object
-    mem: Table[int, Value]
-    ip: int
-    base: int
-    ic, oc: int
-
-const MODE_POS = 0
-const MODE_IMD = 1
-const MODE_REL = 2
-
-proc getRaw(self: Program, i: int): Value =
-  self.mem.getOrDefault(i, 0)
-
-proc getCur(self: Program, i = 0): Value =
-  self.getRaw(self.ip + i)
-
-proc getParam(self: Program, i: int, rw = "r"): Value =
-  let (_, modes) = self.getCur.parseInst
-  let v = self.getCur(i)
-  if rw == "r":
-    case modes[i - 1]:
-    of MODE_POS:
-      self.getRaw(v)
-    of MODE_IMD:
-      v
-    of MODE_REL:
-      self.getRaw(self.base + v)
-    else:
-      raise newException(ValueError, &"invalid mode {modes[i - 1]}")
-  else:
-    case modes[i - 1]:
-    of MODE_POS:
-      v
-    of MODE_IMD:
-      v
-    of MODE_REL:
-      self.base + v
-    else:
-      raise newException(ValueError, &"invalid mode {modes[i - 1]}")
-
-const END = Value.high
-
-proc run(self: Program) =
-  while true:
-    let (op, _) = self.getCur.parseInst
-    case op:
-    of 99:
-      channels[self.oc].send(END)
-      return
-    of 1:
-      let a = self.getParam(1)
-      let b = self.getParam(2)
-      let c = self.getParam(3, "w")
-      self.mem[c] = a + b
-      self.ip += 4
-    of 2:
-      let a = self.getParam(1)
-      let b = self.getParam(2)
-      let c = self.getParam(3, "w")
-      self.mem[c] = a * b
-      self.ip += 4
-    of 3:
-      let a = self.getParam(1, "w")
-      let v = channels[self.ic].recv
-      self.mem[a] = v
-      self.ip += 2
-    of 4:
-      let a = self.getParam(1)
-      channels[self.oc].send(a)
-      self.ip += 2
-    of 5:
-      let a = self.getParam(1)
-      let b = self.getParam(2)
-      if a != 0:
-        self.ip = b
-      else:
-        self.ip += 3
-    of 6:
-      let a = self.getParam(1)
-      let b = self.getParam(2)
-      if a == 0:
-        self.ip = b
-      else:
-        self.ip += 3
-    of 7:
-      let a = self.getParam(1)
-      let b = self.getParam(2)
-      let c = self.getParam(3, "w")
-      self.mem[c] = if a < b: 1 else: 0
-      self.ip += 4
-    of 8:
-      let a = self.getParam(1)
-      let b = self.getParam(2)
-      let c = self.getParam(3, "w")
-      self.mem[c] = if a == b: 1 else: 0
-      self.ip += 4
-    of 9:
-      let a = self.getParam(1)
-      self.base += a
-      self.ip += 2
-    else:
-      raise newException(ValueError, &"unknown op: {op}")
-
-proc parse(input: string): Program =
-  result.new
-  for i, d in input.split(",").mapIt(it.parseBiggestInt):
-    result.mem[i] = d
-  result.base = 0
-  result.ip = 0
-  result.ic = 0
-  result.oc = 1
+proc getMap(input: string): Grid =
+  initQueues(2)
+  let p = newProgram(input, 0, 1)
+  discard p.stepOver
+  getOutput().strip.split('\n')
 
 const DPOS = [(-1, 0), (0, 1), (1, 0), (0, -1)]
 
 const WALL = '#'
 const EMTPY = '.'
 
-proc part1(input: string): int =
-  let p = input.parse
-  spawn p.run
-  sync()
-  var output = ""
-  while true:
-    let c = channels[1].recv
-    if c == END: break
-    output &= c.char
-  writeFile("map.txt", output)
-
-  let grid = output.strip.split("\n")
+proc sumAlign(grid: seq[string]): int =
   let (rows, cols) = (grid.len, grid[0].len)
   for r in 1 ..< rows - 1:
     for c in 1 ..< cols - 1:
@@ -182,8 +32,23 @@ proc part1(input: string): int =
         if grid[nr][nc] == WALL: s += 1
       if s == 4: result += r * c
 
-type
-  Grid = seq[string]
+when defined(test):
+  block:
+    let grid = """
+..#..........
+..#..........
+#######...###
+#.#...#...#.#
+#############
+..#...#...#..
+..#####...^..
+""".strip.split("\n")
+    doAssert sumAlign(grid) == 76
+
+proc part1(input: string): int =
+  input.getMap.sumAlign
+
+
 
 const DIRS = "^>v<"
 
@@ -203,9 +68,10 @@ proc walk(grid: Grid): string =
     let ndir = (dir + o + 4) mod 4
     let (dr, dc) = DPOS[ndir]
     let (nr, nc) = (r + dr, c + dc)
-    if nr notin 0 ..< rows or nc notin 0 ..< cols: return false
-    if grid[nr][nc] != WALL: return false
-    (dir, r, c) = (ndir, nr, nc)
+    if nr notin 0 ..< rows: return
+    if nc notin 0 ..< cols: return
+    if grid[nr][nc] != WALL: return
+    (r, c, dir) = (nr, nc, ndir)
     true
 
   while true:
@@ -253,23 +119,28 @@ when defined(test):
   block:
     doAssert grid.walk.rle == "R,8,R,8,R,4,R,4,R,8,L,6,L,2,R,4,R,4,R,8,R,8,R,8,L,6,L,2"
 
+const MAX_CHARS = 20
+
 proc compress(route: string): (seq[string], seq[int]) =
-  let route = route
   var res: (seq[string], seq[int])
   proc search(i: int, dict: seq[string], sofar: seq[int]): bool =
-    if sofar.len >= 20: return false
+    if sofar.len >= MAX_CHARS: return false
+    if i > route.len: return false
+
     if i == route.len:
       res = (dict, sofar)
       return true
-    if i > route.len: return false
+
     for j, pat in dict:
       if i + pat.len <= route.len and route[i ..< i + pat.len] == pat:
         if search(i + pat.len, dict, sofar & j): return true
+
     if dict.len == 3: return false
     for j in i + 1 .. route.len:
       let pat = route[i ..< j]
-      if pat.rle.len > 20: break
+      if pat.rle.len > MAX_CHARS: break
       if search(i + pat.len, dict & pat, sofar & dict.len): return true
+
   doAssert search(0, newSeq[string](), newSeq[int]())
   res
 
@@ -279,38 +150,40 @@ when defined(test):
     let (dict, routine) = route.compress
     doAssert route == routine.mapIt(dict[it]).join
 
-proc controller() =
-  let grid = readFile("map.txt").strip.split("\n")
+proc runController(p: Program, grid: Grid) =
   let (dict, routine) = grid.walk.compress
+  doAssert dict.len == 3
   let A = dict[0].rle
   let B = dict[1].rle
   let C = dict[2].rle
-  let r = routine.mapIt(char(it + 'A'.ord)).join(",")
-  echo (r, A, B, C)
+  let r = routine.mapIt((it + 'A'.ord).char).join(",")
+  # echo (r, A, B, C)
   for m in [r, A, B, C]:
     for ch in m:
-      channels[0].send ch.ord
-    channels[0].send '\n'.ord
-  channels[0].send 'n'.ord
-  channels[0].send '\n'.ord
+      queues[0].addLast ch.ord
+    queues[0].addLast '\n'.ord
+  queues[0].addLast 'n'.ord
+  queues[0].addLast '\n'.ord
+  discard p.stepOver
 
 proc part2(input: string): int =
-  let p = input.parse
+  initQueues(2)
+  let p = newProgram(input, 0, 1)
   p.mem[0] = 2
-  spawn p.run
-  spawn controller()
-  sync()
-  var s = ""
-  while true:
-    let r = channels[1].recv
-    if r == END: break
-    if r < 256:
-      s &= r.char
+  let grid = input.getMap
+  runController(p, grid)
+
+  var output = ""
+  while queues[1].len > 0:
+    let r = queues[1].popFirst
+    if r < 256: output &= r.char
     else:
-      echo s
+      # echo output
       return r
+
+
 
 when isMainModule and not defined(test):
   let input = readFile("input").strip
-  # echo part1(input)
+  echo part1(input)
   echo part2(input)

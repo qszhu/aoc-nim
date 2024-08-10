@@ -1,33 +1,9 @@
-import std/[
-  algorithm,
-  bitops,
-  deques,
-  heapqueue,
-  intsets,
-  json,
-  lists,
-  math,
-  options,
-  os,
-  rdstdin,
-  re,
-  sequtils,
-  sets,
-  streams,
-  strformat,
-  strutils,
-  tables,
-  threadpool,
-  sugar,
-]
+import ../../lib/imports
 
 
 
 type
   Layer = seq[seq[int]]
-
-proc `$`(self: Layer): string =
-  self.mapIt(it.join).join("\n").replace("1", "#").replace("0", " ")
 
 type
   Image = ref object
@@ -59,16 +35,13 @@ when defined(test):
       @[@[7,8,9],@[0,1,2]]
     ]
 
-proc countDigit(l: Layer, d: int): int =
-  for row in l:
-    for c in row:
-      if c == d: result += 1
+proc countDigit(l: Layer, d: int): int {.inline.} =
+  l.map(row => row.countIt(it == d)).sum
 
 proc part1(input: string): int =
   let img = input.parse(6, 25)
   let zeros = img.layers.mapIt(it.countDigit(0))
-  let minZeros = zeros.min
-  let i = zeros.find(minZeros)
+  let i = zeros.find(zeros.min)
   img.layers[i].countDigit(1) * img.layers[i].countDigit(2)
 
 
@@ -90,11 +63,15 @@ when defined(test):
     let img = input.parse(2, 2)
     doAssert img.merge == @[@[0,1],@[1,0]]
 
+proc `$`(self: Layer): string =
+  self.mapIt(it.join.replace("1", "#").replace("0", " ")).join("\n")
+
 proc part2(input: string): string =
   let img = input.parse(6, 25)
   let layer = img.merge
-  echo layer.mapIt(it.join).join("\n")
   $layer
+
+
 
 when isMainModule and not defined(test):
   let input = readFile("input").strip

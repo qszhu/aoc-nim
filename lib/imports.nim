@@ -9,6 +9,7 @@ import std/[
   math,
   options,
   os,
+  random,
   rdstdin,
   re,
   sequtils,
@@ -21,7 +22,9 @@ import std/[
   sugar,
 ]
 
-import bisect, dsu, graph, grid, imos, llrb, matrix
+import pkg/bigints
+
+import bisect, dsu, graph, grid, imos, llrb, matrix, modBigint
 
 export
   algorithm,
@@ -34,6 +37,7 @@ export
   math,
   options,
   os,
+  random,
   rdstdin,
   re,
   sequtils,
@@ -45,4 +49,6 @@ export
   threadpool,
   sugar
 
-export bisect, dsu, graph, grid, imos, llrb, matrix
+export bigints
+
+export bisect, dsu, graph, grid, imos, llrb, matrix, modBigint

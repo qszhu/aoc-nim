@@ -2,6 +2,36 @@
 
 > `*` denotes tricky problems
 
+## 2019
+
+Day | Tags | Memo
+--- | --- | ---
+[25](2019/day25/solution.nim) | simulation, dfs, interactive, brute force | solve day 17 first; the map is not a grid
+[24](2019/day24/solution.nim) | simulation |
+[23](2019/day23/solution.nim) | simulation | solve day 9 first
+[22](2019/day22/solution.nim)* | matrix, modint, bigint | implement [matrix](lib/matrix.nim)
+[21](2019/day21/solution.nim)* | simulation, brute force | solve day 9 first; only needs an additional "H"; slow
+[20](2019/day20/solution.nim) | parsing, bfs | labels are read either left-to-right or top-to-bottom; part2: compress states by building graph
+[19](2019/day19/solution.nim) | simulation, brute force | solve day 9 first
+[18](2019/day18/solution.nim)* | bfs, bitmask | part1: [same problem on leetcode](https://leetcode.com/problems/shortest-path-to-get-all-keys/); part2: compress states by skipping empty cells; slow
+[17](2019/day17/solution.nim) | simulation, dfs, brute force, rle | solve day 9 first
+[16](2019/day16/solution.nim)* | simulation, suffix sum | part2: the offset is guaranteed at second half
+[15](2019/day15/solution.nim)* | simulation, backtracking, bfs | solve day 9 first; get a map first
+[14](2019/day14/solution.nim) | graph, topological sorting, bisect |
+[13](2019/day13/solution.nim) | simulation | solve day 9 first
+[12](2019/day12/solution.nim) | simulation, period | part2: find peroid for each axis independently
+[11](2019/day11/solution.nim) | simulation | solve day 9 first
+[10](2019/day10/solution.nim) | math, simulation |
+[9](2019/day9/solution.nim) | implementation | solve day 5 first
+[8](2019/day8/solution.nim) | implementation |
+[7](2019/day7/solution.nim) | simulation, permutation | solve day 5 first
+[6](2019/day6/solution.nim) | tree, dfs |
+[5](2019/day5/solution.nim) | simulation | solve day 2 first
+[4](2019/day4/solution.nim) | brute force |
+[3](2019/day3/solution.nim) | simulation, hash |
+[2](2019/day2/solution.nim) | implementation, brute force |
+[1](2019/day1/solution.nim) | implementation |
+
 ## 2018
 
 Day | Tags | Memo

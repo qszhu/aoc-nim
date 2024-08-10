@@ -1,25 +1,4 @@
-import std/[
-  algorithm,
-  bitops,
-  deques,
-  heapqueue,
-  intsets,
-  json,
-  lists,
-  math,
-  options,
-  os,
-  rdstdin,
-  re,
-  sequtils,
-  sets,
-  streams,
-  strformat,
-  strutils,
-  tables,
-  threadpool,
-  sugar,
-]
+import ../../lib/imports
 
 
 
@@ -29,20 +8,22 @@ const EMPTY = '.'
 const DPOS = [(-1, 0), (0, 1), (1, 0), (0, -1)]
 
 type
+  Pos = (int, int)
+
   Grid = ref object
-    grid: seq[string]
+    tiles: seq[string]
     rows, cols: int
-    start, finish: (int, int)
-    portals: Table[(int, int), (int, int)]
+    start, finish: Pos
+    portals: Table[Pos, Pos]
 
 proc parse(input: string): Grid =
-  let input = input.strip(leading = false, chars = { '\n' })
   result.new
+  let input = input.strip(leading = false, chars = { '\n' })
   let lines = input.split("\n")
   let (rows, cols) = (lines.len, lines[0].len)
-  result.grid = newSeqWith(rows - 4, " ".repeat(cols - 4))
-  result.rows = result.grid.len
-  result.cols = result.grid[0].len
+  result.tiles = newSeqWith(rows - 4, " ".repeat(cols - 4))
+  result.rows = result.tiles.len
+  result.cols = result.tiles[0].len
 
   proc getLabel(r, c: int): string =
     for i, (dr, dc) in DPOS:
@@ -53,30 +34,25 @@ proc parse(input: string): Grid =
       if i == 0 or i == 3: swap(a, b)
       return &"{a}{b}"
 
-  var portalMap = initTable[string, seq[(int, int)]]()
+  var portalMap = initTable[string, seq[Pos]]()
   for lr in 2 ..< rows - 2:
     for lc in 2 ..< cols - 2:
       let (r, c) = (lr - 2, lc - 2)
       if lines[lr][lc] == EMPTY or lines[lr][lc] == WALL:
-        result.grid[r][c] = lines[lr][lc]
-      if lines[lr][lc] != EMPTY: continue
+        result.tiles[r][c] = lines[lr][lc]
 
+      if lines[lr][lc] != EMPTY: continue
       let label = getLabel(lr, lc)
       if label.len == 0: continue
 
       if label == "AA":
         result.start = (r, c)
-        continue
-
-      if label == "ZZ":
+      elif label == "ZZ":
         result.finish = (r, c)
-        continue
+      else:
+        if label notin portalMap: portalMap[label] = newSeq[Pos]()
+        portalMap[label].add (r, c)
 
-      var arr = portalMap.getOrDefault(label, newSeq[(int, int)]())
-      arr.add (r, c)
-      portalMap[label] = arr
-
-  result.portals = initTable[(int, int), (int, int)]()
   for name, arr in portalMap:
     result.portals[arr[0]] = arr[1]
     result.portals[arr[1]] = arr[0]
@@ -105,7 +81,7 @@ FG..#########.....#
 """
   block:
     let grid = input.parse
-    # echo grid.grid.join("\n")
+    # echo grid.tiles.join("\n")
     doAssert grid.rows == 15
     doAssert grid.cols == 17
     doAssert grid.start == (0, 7)
@@ -124,8 +100,9 @@ proc bfs(grid: Grid): int =
       if (r, c) == grid.finish: return steps
       for (dr, dc) in DPOS:
         let (nr, nc) = (r + dr, c + dc)
-        if nr notin 0 ..< grid.rows or nc notin 0 ..< grid.cols: continue
-        if grid.grid[nr][nc] != EMPTY: continue
+        if nr notin 0 ..< grid.rows: continue
+        if nc notin 0 ..< grid.cols: continue
+        if grid.tiles[nr][nc] != EMPTY: continue
         if (nr, nc) in visited: continue
         visited.incl (nr, nc)
         next.add (nr, nc)
@@ -134,8 +111,8 @@ proc bfs(grid: Grid): int =
         if (nr, nc) notin visited:
           visited.incl (nr, nc)
           next.add (nr, nc)
+    if next.len > 0: steps += 1
     q = next
-    if q.len > 0: steps += 1
 
 when defined(test):
   block:
@@ -188,13 +165,12 @@ proc part1(input: string): int =
 
 
 
-proc buildGraph(grid: Grid): (seq[(int, int)], seq[seq[(int, int)]]) =
+proc buildGraph(grid: Grid): (seq[Pos], seq[seq[(int, int)]]) =
   let positions = grid.portals.keys.toSeq & grid.start & grid.finish
-  var posMap = initTable[(int, int), int]()
+  var posMap = initTable[Pos, int]()
   for i, p in positions: posMap[p] = i
 
   let N = positions.len
-  var adjList = newSeqWith(N, newSeq[(int, int)]())
   proc bfs(i: int): seq[int] =
     var dists = newSeq[int](N)
     dists.fill int.high
@@ -207,15 +183,17 @@ proc buildGraph(grid: Grid): (seq[(int, int)], seq[seq[(int, int)]]) =
         if (r, c) in posMap: dists[posMap[(r, c)]] = steps
         for (dr, dc) in DPOS:
           let (nr, nc) = (r + dr, c + dc)
-          if nr notin 0 ..< grid.rows or nc notin 0 ..< grid.cols: continue
-          if grid.grid[nr][nc] != EMPTY: continue
+          if nr notin 0 ..< grid.rows: continue
+          if nc notin 0 ..< grid.cols: continue
+          if grid.tiles[nr][nc] != EMPTY: continue
           if (nr, nc) in visited: continue
           visited.incl (nr, nc)
           next.add (nr, nc)
+      if next.len > 0: steps += 1
       q = next
-      if q.len > 0: steps += 1
     dists
 
+  var adjList = newSeqWith(N, newSeq[(int, int)]())
   for u in 0 ..< N:
     let dists = bfs(u)
     for v, w in dists:
@@ -229,7 +207,7 @@ when defined(test):
   block:
     let grid = input.parse
     let (positions, adjList) = grid.buildGraph
-    var posMap = initTable[(int, int), int]()
+    var posMap = initTable[Pos, int]()
     for i, p in positions: posMap[p] = i
     doAssert adjList[posMap[(0, 7)]].len == 3
     doAssert adjList[posMap[(0, 7)]].contains (posMap[(4, 7)], 4)
@@ -246,7 +224,7 @@ proc isOuter(grid: Grid, r, c: int): bool {.inline.} =
 
 proc bfs2(grid: Grid): int =
   let (positions, adjList) = grid.buildGraph
-  var posMap = initTable[(int, int), int]()
+  var posMap = initTable[Pos, int]()
   for i, p in positions: posMap[p] = i
 
   let (sr, sc) = grid.start
