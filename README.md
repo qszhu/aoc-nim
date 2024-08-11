@@ -6,10 +6,10 @@
 
 Day | Tags | Memo
 --- | --- | ---
-[25](2019/day25/solution.nim) | simulation, dfs, interactive, brute force | solve day 17 first; the map is not a grid
+[25](2019/day25/solution.nim) | simulation, dfs, interactive, brute force | solve day 9 first; the map is a tree not a grid
 [24](2019/day24/solution.nim) | simulation |
 [23](2019/day23/solution.nim) | simulation | solve day 9 first
-[22](2019/day22/solution.nim)* | matrix, modint, bigint | implement [matrix](lib/matrix.nim)
+[22](2019/day22/solution.nim)* | matrix, modint, bigint | implement [matrix](lib/matrix.nim), [modint](lib/modBigint.nim)
 [21](2019/day21/solution.nim)* | simulation, brute force | solve day 9 first; only needs an additional "H"; slow
 [20](2019/day20/solution.nim) | parsing, bfs | labels are read either left-to-right or top-to-bottom; part2: compress states by building graph
 [19](2019/day19/solution.nim) | simulation, brute force | solve day 9 first
