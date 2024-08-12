@@ -6,6 +6,7 @@
 
 Day | Tags | Memo
 --- | --- | ---
+[2](2020/day2/solution.nim) | implementation |
 [1](2020/day1/solution.nim) | two pointers |
 
 ## 2019
