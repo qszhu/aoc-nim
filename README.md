@@ -2,6 +2,12 @@
 
 > `*` denotes tricky problems
 
+## 2020
+
+Day | Tags | Memo
+--- | --- | ---
+[1](2020/day1/solution.nim) | two pointers |
+
 ## 2019
 
 Day | Tags | Memo
