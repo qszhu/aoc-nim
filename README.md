@@ -6,6 +6,7 @@
 
 Day | Tags | Memo
 --- | --- | ---
+[7](2020/day5/solution.nim) | regex, graph, dfs |
 [6](2020/day5/solution.nim) | implementation, set |
 [5](2020/day5/solution.nim) | implementation |
 [4](2020/day4/solution.nim) | implementation, regex |
