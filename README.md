@@ -6,6 +6,7 @@
 
 Day | Tags | Memo
 --- | --- | ---
+[9](2020/day9/solution.nim) | implementation, prefix sum, bisect |
 [8](2020/day8/solution.nim) | simulation |
 [7](2020/day7/solution.nim) | regex, graph, dfs |
 [6](2020/day6/solution.nim) | implementation, set |
