@@ -6,6 +6,7 @@
 
 Day | Tags | Memo
 --- | --- | ---
+[12](2020/day12/solution.nim) | implementation | turning degrees are multiples of 90
 [11](2020/day11/solution.nim) | simulation |
 [10](2020/day10/solution.nim) | implementation, sort, counter, dp |
 [9](2020/day9/solution.nim) | implementation, prefix sum, bisect |
