@@ -25,7 +25,7 @@ import std/[
 
 import pkg/bigints
 
-import bisect, dsu, graph, grid, imos, llrb, matrix, modBigint
+import bisect, dsu, graph, grid, imos, llrb, math, matrix, modBigint
 
 export
   algorithm,
@@ -53,4 +53,4 @@ export
 
 export bigints
 
-export bisect, dsu, graph, grid, imos, llrb, matrix, modBigint
+export bisect, dsu, graph, grid, imos, llrb, math, matrix, modBigint
