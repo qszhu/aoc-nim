@@ -6,6 +6,7 @@
 
 Day | Tags | Memo
 --- | --- | ---
+[15](2020/day15/solution.nim) | simulation |
 [14](2020/day14/solution.nim) | implementation |
 [13](2020/day13/solution.nim) | math, chinese remainder theorem | implement [crt](lib/maths.nim)
 [12](2020/day12/solution.nim) | implementation | turning degrees are multiples of 90
