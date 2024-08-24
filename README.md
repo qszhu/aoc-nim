@@ -6,6 +6,7 @@
 
 Day | Tags | Memo
 --- | --- | ---
+[17](2020/day17/solution.nim) | simulation |
 [16](2020/day16/solution.nim) | implementation |
 [15](2020/day15/solution.nim) | simulation |
 [14](2020/day14/solution.nim) | implementation |
