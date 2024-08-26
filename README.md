@@ -6,6 +6,7 @@
 
 Day | Tags | Memo
 --- | --- | ---
+[18](2020/day18/solution.nim) | expression, stack | part2: [Shunting yard algorithm](https://en.wikipedia.org/wiki/Shunting_yard_algorithm)
 [17](2020/day17/solution.nim) | simulation |
 [16](2020/day16/solution.nim) | implementation |
 [15](2020/day15/solution.nim) | simulation |
