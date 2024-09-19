@@ -6,9 +6,16 @@
 
 Day | Tags | Memo
 --- | --- | ---
-[18](2020/day18/solution.nim) | expression, stack | part2: [Shunting yard algorithm](https://en.wikipedia.org/wiki/Shunting_yard_algorithm)
+[25](2020/day25/solution.nim) | implementation |
+[24](2020/day24/solution.nim) | hexagon, simulation | See 2017 day 11
+[23](2020/day23/solution.nim)* | simulation, table | part2: use hash table to implement circular linked list
+[22](2020/day22/solution.nim) | simulation, deque |
+[21](2020/day21/solution.nim) | set |
+[20](2020/day20/solution.nim)* | implementation | borders are unique; monsters won't overlap
+[19](2020/day19/solution.nim)* | dfs, grammar | part2: brute force rules
+[18](2020/day18/solution.nim) | expression, stack | [Shunting yard algorithm](https://en.wikipedia.org/wiki/Shunting_yard_algorithm)
 [17](2020/day17/solution.nim) | simulation |
-[16](2020/day16/solution.nim) | implementation |
+[16](2020/day16/solution.nim) | implementation, set |
 [15](2020/day15/solution.nim) | simulation |
 [14](2020/day14/solution.nim) | implementation |
 [13](2020/day13/solution.nim) | math, chinese remainder theorem | implement [crt](lib/maths.nim)
@@ -16,7 +23,7 @@ Day | Tags | Memo
 [11](2020/day11/solution.nim) | simulation |
 [10](2020/day10/solution.nim) | implementation, sort, counter, dp |
 [9](2020/day9/solution.nim) | implementation, prefix sum, bisect |
-[8](2020/day8/solution.nim) | simulation |
+[8](2020/day8/solution.nim) | simulation, brute force |
 [7](2020/day7/solution.nim) | regex, graph, dfs |
 [6](2020/day6/solution.nim) | implementation, set |
 [5](2020/day5/solution.nim) | implementation |
